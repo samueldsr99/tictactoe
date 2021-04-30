@@ -32,7 +32,7 @@ def start(player_turn=1):
                 cprint('Invalid position, AI is broken!', RED)
                 input()
                 continue
-        else:
+        elif state.turn == player_turn:
             inp = input()
             if inp == '':
                 continue
@@ -64,4 +64,7 @@ if __name__ == '__main__':
         '--turn', default='1', type=int, help='Your turn (1 or 2)')
     args = parser.parse_args()
 
-    start(player_turn=int(args.turn))
+    if args.turn not in [1, 2]:
+        cprint('Invalid turn\n', RED)
+    else:
+        start(player_turn=int(args.turn))
