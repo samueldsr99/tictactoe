@@ -93,5 +93,5 @@ class RandomAgent:
         return random.choice(state.choices())
 
 
-# 
-Agent = RandomAgent
+# Agent = RandomAgent
+Agent = MiniMaxAgent
