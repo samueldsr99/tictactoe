@@ -35,23 +35,42 @@ class MiniMaxAgent:
                 best_value = child_value
                 best_move = choice
 
-        if best_value == 1:
+        if best_value > 1000:
             cprint('mmmm... I\'m about to win :)\n', YELLOW)
             input()
         return best_move
 
-    def leaf_value(self, winner: int, turn: int):
+    def connection_value(self, arr: [], val: int):
+        m = []
+        for i in [0, 3, 6]:
+            m.append([arr[i], arr[i + 1], arr[i + 2]])
+
+        dr = [1, 0, -1, 0, 1, 1, -1, -1]
+        dc = [0, 1, 0, -1, 1, -1, -1, 1]
+        counter = 0
+        for i in range(len(m)):
+            for j in range(len(m[0])):
+                if m[i][j] != val:
+                    continue
+                for d in range(8):
+                    ni, nj = i + dr[d], j + dc[d]
+                    if ni >= 0 and ni < 3 and nj >= 0 and nj < 3:
+                        counter += (m[i][j] == m[ni][nj])
+        return counter
+
+    def leaf_value(self, state: State, winner: int, turn: int, moves_amount: int):
+        BIAS = 1000
         if winner == turn: # win
-            return 1
+            return BIAS + 1 / moves_amount
         if winner == 3 - turn: # lose
             return -1
-        return 0 # tie
+        return self.connection_value(state.matrix, turn) # tie
 
-    def min_value(self, state: State, turn: int):
+    def min_value(self, state: State, turn: int, depth: int = 1):
         winner = state.winner()
 
         if winner != 0:
-            return self.leaf_value(winner, turn)
+            return self.leaf_value(state, winner, turn, depth)
 
         choices = state.choices()
         random.shuffle(choices)
@@ -62,17 +81,17 @@ class MiniMaxAgent:
             new_state = state.clone()
             new_state.move(choice)
 
-            child_value = self.max_value(new_state, turn)
+            child_value = self.max_value(new_state, turn, depth + 1)
             o.append((child_value, choice))
 
             mn = min(mn, child_value)
         return mn
 
-    def max_value(self, state: State, turn: int):
+    def max_value(self, state: State, turn: int, depth: int = 1):
         winner = state.winner()
 
         if winner != 0:
-            return self.leaf_value(winner, turn)
+            return self.leaf_value(state, winner, turn, depth)
         
         choices = state.choices()
         random.shuffle(choices)
@@ -82,7 +101,7 @@ class MiniMaxAgent:
             new_state = state.clone()
             new_state.move(choice)
 
-            child_value = self.min_value(new_state, turn)
+            child_value = self.min_value(new_state, turn, depth + 1)
 
             mx = max(mx, child_value)
         return mx
@@ -95,3 +114,9 @@ class RandomAgent:
 
 # Agent = RandomAgent
 Agent = MiniMaxAgent
+
+a = MiniMaxAgent()
+
+print(a.connection_value([2, 1, 1, 1, 2, 2, 2, 1, 1], 1))
+
+print(a.connection_value([2, 1, 2, 1, 1, 2, 1, 2, 1], 1))
